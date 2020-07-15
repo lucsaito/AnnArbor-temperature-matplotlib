@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import datetime
 
 #Loading data
 data = pd.read_csv("fb441e62df2d58994928907a91895ec62c2c42e6cd075c2700843b89.csv")
@@ -17,11 +18,6 @@ for i in range(2005, 2015):
         data_min.drop(data_min[data_min.index == '{}-02-29'.format(i)].index, inplace=True)
     except:
         pass
-
-
-
-
-
 
 
 fig, axs = plt.subplots(2, figsize=(8, 7))
@@ -49,13 +45,13 @@ def create_plot():
 
     axs[0].set_xlabel("Years", fontsize=10)
     axs[0].set_ylabel("°C", fontsize=10)
-    axs[0].legend(loc="upper right")
+    #axs[0].legend(loc="upper right")
 
     # Filling between max and min lines
     axs[0].fill_between(data_max_plot1.index,
                         data_min_plot1['Data_Value'], data_max_plot1['Data_Value'],
                         facecolor='blue', alpha=0.25)
-#create_plot()
+
 def create_plot2():
     data_max_plot2 = data_max['2015-01-01':'2015-12-31']
     data_min_plot2 = data_min['2015-01-01':'2015-12-31']
@@ -83,10 +79,34 @@ def create_plot2():
     axs[1].fill_between(data_max_plot2.index,
                         data_min_plot2['Data_Value'], data_max_plot2['Data_Value'],
                         facecolor='blue', alpha=0.25)
+    def create_scatter():
+        scatter_max = data[data['Element'] == "TMAX"].groupby('Date').max().copy()
+        scatter_min = data[data['Element'] == "TMIN"].groupby('Date').min().copy()
+        scatter_max = scatter_max['2005-01-01':'2014-12-31']
+        scatter_min = scatter_min['2005-01-01':'2014-12-31']
+
+        scatter_max['Data_Value'] /= 10
+        scatter_min['Data_Value'] /= 10
+
+        scatter_max.index = pd.to_datetime(scatter_max.index)
+        scatter_min.index = pd.to_datetime(scatter_max.index)
+        pd.set_option('display.max_rows', None)
+
+        scatter_max = scatter_max.loc[scatter_max.groupby([scatter_max.index.month, scatter_max.index.day])['Data_Value'].idxmax()]
+        scatter_min = scatter_min.loc[scatter_min.groupby([scatter_min.index.month, scatter_min.index.day])['Data_Value'].idxmin()]
+
+        #scatter_max.index.map(change_year)
+        print(scatter_max.index)
+        #axs[0].scatter(scatter_max.index, scatter_max['Data_Value'], marker='o')
+        #axs[0].scatter(scatter_min.index, scatter_min['Data_Value'], marker='o')
+
+
+
+
+
+    create_scatter()
+
 create_plot()
 create_plot2()
 
-plt.show()
-
-
-
+#plt.show()
